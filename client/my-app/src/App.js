@@ -1,46 +1,78 @@
 import logo from './logo.svg';
 import './App.css';
 import './index.js'
+import { useState } from "react";
 
 import {
   useQuery,
   gql
 } from "@apollo/client";
 
-const EXCHANGE_RATES = gql`
-  query GetExchangeRates {
-    rates(currency: "USD") {
-      currency
-      rate
+function App() {
+
+  const [selectedDog, setSelectedDog] = useState(null);
+
+  console.log(selectedDog)
+  console.log(setSelectedDog)
+
+  function onDogSelected({ target }) {
+    setSelectedDog(target.value);
+  }
+
+  const GET_DOGS = gql`
+  query GetDogs {
+    dogs {
+      id
+      breed
     }
   }
 `;
+function Dogs({ onDogSelected }) {
+  const { loading, error, data } = useQuery(GET_DOGS);
 
-var cnt = 0
-function ExchangeRates() {
-  const { loading, error, data } = useQuery(EXCHANGE_RATES);
-  console.log(cnt++);
-  console.log(loading);
-  console.log(error);
-  console.log(data);
+  if (loading) return 'Loading...';
+  if (error) return `Error! ${error.message}`;
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error :(</p>;
-
-  return data.rates.map(({ currency, rate }) => (
-    <div key={currency}>
-      <p>
-        {currency}: {rate}
-      </p>
-    </div>
-  ));
+  return (
+    <select name="dog" onChange={onDogSelected}>
+      {
+        data.dogs.map(dog => (
+          <option key={dog.id} value={dog.breed}>
+            {dog.breed}
+          </option>
+        ))
+      }
+    </select>
+  )
 }
 
-function App() {
+const GET_DOG_PHOTO = gql`
+  query Dog($breed: String!) {
+    dog(breed: $breed) {
+      id
+      displayImage
+    }
+  }
+`;
+  
+  function DogPhoto({ breed }) {
+    const { loading, error, data } = useQuery(GET_DOG_PHOTO, {
+      variables: { breed },
+    });
+  
+    if (loading) return null;
+    if (error) return `Error! ${error}`;
+  
+    return (
+      <img src={data.dog.displayImage} style={{ height: 100, width: 100 }} />
+    );
+  }
+
   return (
     <div>
       <h2>My first Apollo app 🚀</h2>
-      <ExchangeRates />
+      <Dogs onDogSelected={onDogSelected}/>
+      <DogPhoto breed={selectedDog}/>
     </div>
   );
 }
