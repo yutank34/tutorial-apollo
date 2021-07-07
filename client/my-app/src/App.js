@@ -12,9 +12,6 @@ function App() {
 
   const [selectedDog, setSelectedDog] = useState(null);
 
-  console.log(selectedDog)
-  console.log(setSelectedDog)
-
   function onDogSelected({ target }) {
     setSelectedDog(target.value);
   }
@@ -33,11 +30,16 @@ function Dogs({ onDogSelected }) {
   if (loading) return 'Loading...';
   if (error) return `Error! ${error.message}`;
 
+  // Set state to display the image at initial display
+  if (!selectedDog) {
+    setSelectedDog(data.dogs[0].breed);
+  }
+
   return (
-    <select name="dog" onChange={onDogSelected}>
+    <select name="dog" onChange={onDogSelected} value={selectedDog}>
       {
         data.dogs.map(dog => (
-          <option key={dog.id} value={dog.breed}>
+          <option key={dog.id} value={dog.breed} >
             {dog.breed}
           </option>
         ))
