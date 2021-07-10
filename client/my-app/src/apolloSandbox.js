@@ -10,7 +10,7 @@ import {
 
 function ApolloSandboxPage() {
 
-    const [selectedDog, setSelectedDog] = useState(null);
+    const [selectedDog, setSelectedDog] = useState('-');
 
     function onDogSelected({ target }) {
         setSelectedDog(target.value);
@@ -31,13 +31,11 @@ function ApolloSandboxPage() {
         if (loading) return 'Loading...';
         if (error) return `Error! ${error.message}`;
 
-        // Set state to display the image at initial display
-        if (!selectedDog) {
-            setSelectedDog(data.dogs[0].breed);
-        }
-
         return (
             <select name="dog" onChange={onDogSelected} value={selectedDog}>
+                <option key="-" value="-">
+                        -
+                </option>
                 {
                     data.dogs.map(dog => (
                         <option key={dog.id} value={dog.breed} >
@@ -59,16 +57,19 @@ function ApolloSandboxPage() {
     `;
   
     function DogPhoto({ breed }) {
+
+        let queryparm = breed || 'affenpinscher';
+
         const { loading, error, data } = useQuery(GET_DOG_PHOTO, {
-            variables: { breed },
+            variables: { breed: queryparm },
         });
   
         if (loading) return null;
         if (error) return `Error! ${error}`;
+
+        const result = data.dog.id === "J" ? null : <img src={data.dog.displayImage} style={{ height: 100, width: 100 }} alt={breed} />;
   
-        return (
-            <img src={data.dog.displayImage} style={{ height: 100, width: 100 }} />
-        );
+        return result;
     }
 
     return (
