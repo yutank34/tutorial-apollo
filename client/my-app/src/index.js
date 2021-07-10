@@ -9,7 +9,9 @@ import {
 } from "@apollo/client";
 
 const client = new ApolloClient({
-  uri: 'https://71z1g.sse.codesandbox.io/',
+  // Test fetch
+  // uri: 'https://71z1g.sse.codesandbox.io/',
+  uri: 'https://sxewr.sse.codesandbox.io/',
   cache: new InMemoryCache()
 });
 

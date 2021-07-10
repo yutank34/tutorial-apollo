@@ -5,10 +5,12 @@ import { useState } from "react";
 import { Link } from 'react-router-dom';
 import {
   useQuery,
-  gql
+  gql,
+  NetworkStatus,
+  useLazyQuery
 } from "@apollo/client";
 
-function ApolloSandboxPage() {
+function ApolloFetchSandboxPage() {
 
     const [selectedDog, setSelectedDog] = useState('-');
 
@@ -26,7 +28,9 @@ function ApolloSandboxPage() {
     `;
 
     function Dogs({ onDogSelected }) {
-        const { loading, error, data } = useQuery(GET_DOGS);
+        const { loading, error, data } = useQuery(GET_DOGS, {
+            fetchPolicy: "network-only"
+        });
 
         if (loading) return 'Loading...';
         if (error) return `Error! ${error.message}`;
@@ -58,19 +62,40 @@ function ApolloSandboxPage() {
   
     function DogPhoto({ breed }) {
 
-        let queryparm = breed || 'affenpinscher';
-
-        const { loading, error, data } = useQuery(GET_DOG_PHOTO, {
-            variables: { breed: queryparm },
+        const { loading, error, data, refetch, networkStatus } = useQuery(GET_DOG_PHOTO, {
+            variables: { breed },
+            notifyOnNetworkStatusChange: true,
+            // pollInterval: 500, // start polling 
         });
-  
+
+        if (networkStatus === NetworkStatus.refetch) return 'Refetching!';
         if (loading) return null;
         if (error) return `Error! ${error}`;
 
         const result = data.dog.id === "J" ? null : <img src={data.dog.displayImage} style={{ height: 100, width: 100 }} alt={breed} />;
   
-        return result;
+        return (
+            <>
+                {result}
+                <button onClick={() => refetch()}>Refetch!</button>
+            </>
+        );
     }
+
+    function DelayedQuery() {
+        const [getDog, { loading, data }] = useLazyQuery(GET_DOG_PHOTO);
+      
+        if (loading) return <p>Loading ...</p>;
+      
+        return (
+          <div>
+            {data && data.dog && <img src={data.dog.displayImage} alt={data.dog.breed}/>}
+            <button onClick={() => getDog({ variables: { breed: 'bulldog' } })}>
+              Click me!
+            </button>
+          </div>
+        );
+      }
 
     return (
         <div>
@@ -78,10 +103,11 @@ function ApolloSandboxPage() {
             <div>
                 <Dogs onDogSelected={onDogSelected}/>
                 <DogPhoto breed={selectedDog}/>
+                <DelayedQuery />
             </div>
-            <Link to={`/sandbox`}>Go to Sandbox</Link>
+            <Link to={`/`}>Back to TOP</Link>
         </div>
     );
 }
 
-export default ApolloSandboxPage;
+export default ApolloFetchSandboxPage;
