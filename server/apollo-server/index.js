@@ -9,7 +9,12 @@ const typeDefs = gql`
   # This "Book" type defines the queryable fields for every book in our data source.
   type Book {
     title: String
-    author: String
+    author: Author
+  }
+
+  type Author {
+    name: String
+    books: [Book]
   }
 
   # The "Query" type is special: it lists all of the available queries that
@@ -17,6 +22,7 @@ const typeDefs = gql`
   # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
     books: [Book]
+    authors: [Author]
   }
 `;
 
@@ -27,6 +33,7 @@ const resolvers = {
   Query: {
     // books: () => books,
     books: () => require('./strage.js').books,
+    authors: () => require('./strage.js').authors,
   },
 };
 
@@ -43,19 +50,6 @@ console.log('1');
 console.log('2');
 console.log('3');
 console.log('4');
-
-
-
-const books = [
-  {
-    title: 'The Awakening',
-    author: 'Kate Chopin',
-  },
-  {
-    title: 'City of Glass',
-    author: 'Paul Auster',
-  },
-]
 
 const f = () => {
   let fs = require("fs");
