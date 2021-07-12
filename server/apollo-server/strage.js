@@ -2,11 +2,11 @@ module.exports = {
     books: [
         {
             title: 'The Awakening',
-            author: 'Kate Chopin',
+            author: 'Kate Chopin'
         },
         {
             title: 'City of Glass',
-            author: 'Paul Auster',
+            author: 'Paul Auster'
         },
     ],
     authors: [
