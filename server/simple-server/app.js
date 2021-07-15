@@ -5,9 +5,9 @@ const port = 3000;
 
 const MAX_COUNT = 1000000000;
 const server = http.createServer((req, res) => {
-  console.log(req.url)
+  console.log('url: ' + req.url)
   const [url, queryString] = req.url.split('?');
-  console.log(queryString)
+  console.log('query: ' + queryString);
   const params = new Map()
   if (queryString) {
     queryString.split('&').forEach(element => {
@@ -15,7 +15,6 @@ const server = http.createServer((req, res) => {
       params.set(key, value);
     })
   }
-  console.log(params);
   if (req.url == "/") {
     createResponse("normal end.", res);
   } else if (url == "/heavy") {
@@ -32,8 +31,26 @@ const server = http.createServer((req, res) => {
     asyncAvg(params.get('n'), (avg) => {
       createResponse('avg of 1-n: ' + avg, res);
     });
-  }
-  else {
+  } else if (url == "/dosomething") {
+    const hoge = 'hoge'
+    setTimeout(() => {
+      hoge = doSomething()
+    }
+    , 0)
+    console.log("↓↓↓")
+    console.log(hoge)
+    createResponse(hoge, res) ;
+  }  else if (url == "/promise") {
+    samplePromise().then(result => {
+      console.log('↓↓↓');
+      console.log(result);
+      createResponse(String(result), res); // => 15
+    });
+  }  else if (url == "/async") {
+    sampleAsync().then(result => {
+      createResponse(String(result), res); // => 15
+    });
+  } else {
     createResponse('not found.', res);
   }
 });
@@ -103,7 +120,7 @@ function doTimeout(isSync, res) {
   }
 }
 
-function doSomething() {
+async function doSomething() {
   let a = "initial";
 
   console.log('1st log');
@@ -117,7 +134,7 @@ function doSomething() {
   console.log("3rd log");
   console.log(`3rd ${a}`);
 
-  return a;
+  return a; 
 }
 
 function asyncAvg(n, avgCB) {
@@ -153,4 +170,34 @@ function createResponse(value, res) {
   res.statusCode = 200;
   res.setHeader('Content-Type', 'text/plain');
   res.end(value);
+}
+
+function sampleResolve(value) {
+  console.log('in sampleResolve');
+  console.log('  value: ' + value);
+  return new Promise(resolve => {
+    console.log('in Promise constructor');
+    console.log('  value: '  + value);
+    console.log('  resolve: ' + resolve);
+      setTimeout(() => {
+          console.log('in setTimeout');
+          console.log('  value: ' + value);
+          resolve(value * 2);
+      }, 2000);
+  })
+}
+
+function samplePromise() {
+  return sampleResolve(5).then(result => {
+    console.log('in samplePromise');
+    console.log('  result:' + result);
+    return result + 5;
+  });
+}
+
+async function sampleAsync() {
+  const result = await sampleResolve(5); // resolve(10)
+  console.log('in sampleAsync');
+  console.log('  result: ' + result);
+  return result + 5;
 }
