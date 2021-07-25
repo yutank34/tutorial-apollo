@@ -79,14 +79,9 @@ function doInterval(isSync, res) {
       clearInterval(timeout); // 100億回に達したらsetIntervalを終了
       if (isSync) createResponse("interval end. count -> " + cnt, res);
     }
-    // console.log('do...');
     cnt++;
     i++;
 
-    // console.log('interval');
-    // console.log('count -> ' + cnt);
-    // console.log('i -> ' + cnt);
-    // console.log('timeout -> ' + timeout);
     if (cnt % 10000 == 0) {
       console.log(cnt + ', do...')
     }
